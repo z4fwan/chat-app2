@@ -5,12 +5,13 @@ import cors from "cors";
 import path from "path";
 
 import { connectDB } from "./lib/db.js";
+import { app, server } from "./lib/socket.js";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
-import adminRoutes from "./routes/admin.routes.js"; // ✅ Admin routes
+import adminRoutes from "./routes/admin.routes.js";
 
-import { app, server } from "./lib/socket.js";
+import User from "./models/user.model.js"; // ✅ For /make-me-admin
 
 dotenv.config();
 
@@ -32,15 +33,35 @@ app.use(
   })
 );
 
-// ✅ Test route to verify server is working
+// ✅ TEMP: Promote your user to admin
+app.get("/make-me-admin", async (req, res) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { email: "zn4.studio@gmail.com" },
+      { isAdmin: true },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({ message: "You are now admin", user });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ✅ Test if server is working
 app.get("/api/test", (req, res) => {
   res.send("Simple test route working ✅");
 });
 
-// ✅ API Routes
+// ✅ Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
-app.use("/api/admin", adminRoutes); // ✅ Admin route
+app.use("/api/admin", adminRoutes);
 
 // ✅ Serve frontend in production
 if (process.env.NODE_ENV === "production") {
