@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import { connectDB } from "./lib/db.js";
-import { app, server } from "./lib/socket.js";
+import { app as socketApp, server } from "./lib/socket.js";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
@@ -15,26 +16,30 @@ import User from "./models/user.model.js"; // ✅ For /make-me-admin
 
 dotenv.config();
 
-const PORT = process.env.PORT;
-const __dirname = path.resolve();
+const PORT = process.env.PORT || 5001;
 
+// Fix __dirname in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ Allowed frontend origins
 const allowedOrigins = [
   "http://localhost:5173",
   "https://chat-app2-1-ffffffrnt.onrender.com",
 ];
 
-app.use(express.json());
-app.use(cookieParser());
-
-app.use(
+// ✅ Middlewares
+socketApp.use(express.json());
+socketApp.use(cookieParser());
+socketApp.use(
   cors({
     origin: allowedOrigins,
     credentials: true,
   })
 );
 
-// ✅ TEMP: Promote your user to admin
-app.get("/make-me-admin", async (req, res) => {
+// ✅ Promote a user to admin (temporary route)
+socketApp.get("/make-me-admin", async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
       { email: "zn4.studio@gmail.com" },
@@ -53,27 +58,27 @@ app.get("/make-me-admin", async (req, res) => {
   }
 });
 
-// ✅ Test if server is working
-app.get("/api/test", (req, res) => {
+// ✅ Simple test route
+socketApp.get("/api/test", (req, res) => {
   res.send("Simple test route working ✅");
 });
 
-// ✅ Mount routes
-app.use("/api/auth", authRoutes);
-app.use("/api/messages", messageRoutes);
-app.use("/api/admin", adminRoutes);
+// ✅ API routes
+socketApp.use("/api/auth", authRoutes);
+socketApp.use("/api/messages", messageRoutes);
+socketApp.use("/api/admin", adminRoutes);
 
 // ✅ Serve frontend in production
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  socketApp.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  app.get("*", (req, res) => {
+  socketApp.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
   });
 }
 
+// ✅ Start server and connect DB
 server.listen(PORT, () => {
-  console.log("server is running on PORT:" + PORT);
+  console.log("✅ Server is running on PORT:", PORT);
   connectDB();
 });
-
