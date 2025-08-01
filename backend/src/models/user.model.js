@@ -20,24 +20,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-
-    // ✅ Admin panel fields
     isAdmin: {
       type: Boolean,
-      default: false, // Only admins will be able to access admin panel
+      default: false,
     },
     isBlocked: {
       type: Boolean,
-      default: false, // If true, user can't login/chat
+      default: false,
     },
     isVerified: {
       type: Boolean,
-      default: false, // True means user has a blue badge or verified status
+      default: false,
     },
   },
-  {
-    timestamps: true, // Adds createdAt and updatedAt automatically
-  }
+  { timestamps: true }
 );
 
 const User = mongoose.model("User", userSchema);
