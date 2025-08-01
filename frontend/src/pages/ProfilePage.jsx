@@ -5,7 +5,6 @@ const handleImageUpload = async (e) => {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
-  formData.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
 
   try {
     const res = await fetch(
@@ -17,13 +16,18 @@ const handleImageUpload = async (e) => {
     );
 
     const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || "Upload failed");
+
     const imageUrl = data.secure_url;
 
     if (imageUrl) {
-      setSelectedImg(imageUrl);
-      await updateProfile({ profilePic: imageUrl });
+      setSelectedImg(imageUrl); // This updates the local preview (optional)
+      await updateProfile({ profilePic: imageUrl }); // This sends to backend
+      toast.success("Profile picture updated!");
     }
   } catch (err) {
     console.error("Upload failed:", err);
+    toast.error("Upload failed");
   }
 };
+
