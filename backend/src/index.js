@@ -11,36 +11,32 @@ import { app, server } from "./lib/socket.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import adminRoutes from "./routes/admin.routes.js";
+import User from "./models/user.model.js"; // For /make-me-admin
 
-import User from "./models/user.model.js";
+dotenv.config();
 
-// Setup __dirname for ES modules
+// ✅ Fix __dirname in ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Load environment variables
-dotenv.config();
+const PORT = process.env.PORT || 5001;
 
-// Connect to MongoDB
-connectDB();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://chat-app2-1-ffffffrnt.onrender.com",
+];
 
-// Middleware
+// ✅ Middlewares
 app.use(express.json());
 app.use(cookieParser());
-
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://chat-app2-1-ffffffrnt.onrender.com"],
+    origin: allowedOrigins,
     credentials: true,
   })
 );
 
-// 🔍 TEST ROUTE
-app.get("/api/test", (req, res) => {
-  res.send("✅ Test route working!");
-});
-
-// 📍 TEMP: Make a user admin
+// ✅ TEMP: Promote a user to admin
 app.get("/make-me-admin", async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
@@ -60,23 +56,28 @@ app.get("/make-me-admin", async (req, res) => {
   }
 });
 
-// Routes
+// ✅ Test route
+app.get("/api/test", (req, res) => {
+  res.send("Simple test route working ✅");
+});
+
+// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/admin", adminRoutes);
 
-// Production static serving
+// ✅ Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
   });
 }
 
-// Start server
-const PORT = process.env.PORT || 5001;
+// ✅ Start server
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log("✅ Server running on PORT:", PORT);
+  connectDB();
 });
 
