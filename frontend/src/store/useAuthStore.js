@@ -3,11 +3,8 @@ import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-// ✅ Use correct backend URL for socket connection
-const BASE_URL =
-  import.meta.env.MODE === "development"
-    ? "http://localhost:5001"
-    : "https://chat-app2-foiy.onrender.com"; // <-- your backend Render URL
+// ✅ Hardcoded backend URL to fix socket issue on deployment
+const BASE_URL = "https://chat-app2-foiy.onrender.com";
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
