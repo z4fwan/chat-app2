@@ -1,4 +1,3 @@
-// src/pages/AdminDashboard.jsx
 import { useEffect, useState } from "react";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
@@ -8,7 +7,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axiosInstance.get("/api/admin/users");
+      const res = await axiosInstance.get("/admin/users"); // ✅ fixed
       setUsers(res.data);
     } catch (err) {
       toast.error("Failed to load users");
@@ -18,7 +17,7 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure to delete this user?")) return;
     try {
-      await axiosInstance.delete(`/api/admin/users/${id}`);
+      await axiosInstance.delete(`/admin/users/${id}`); // ✅ fixed
       toast.success("User deleted");
       fetchUsers();
     } catch {
@@ -28,7 +27,7 @@ const AdminDashboard = () => {
 
   const toggleBlock = async (id) => {
     try {
-      await axiosInstance.put(`/api/admin/users/${id}/block`);
+      await axiosInstance.put(`/admin/users/${id}/block`); // ✅ fixed
       fetchUsers();
     } catch {
       toast.error("Error blocking user");
@@ -37,7 +36,7 @@ const AdminDashboard = () => {
 
   const toggleVerify = async (id) => {
     try {
-      await axiosInstance.put(`/api/admin/users/${id}/verify`);
+      await axiosInstance.put(`/admin/users/${id}/verify`); // ✅ fixed
       fetchUsers();
     } catch {
       toast.error("Error verifying user");
