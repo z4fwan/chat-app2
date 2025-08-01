@@ -8,6 +8,8 @@ import { connectDB } from "./lib/db.js";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
+import adminRoutes from "./routes/admin.routes.js"; // ✅ ADD THIS
+
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
@@ -15,7 +17,6 @@ dotenv.config();
 const PORT = process.env.PORT;
 const __dirname = path.resolve();
 
-// ✅ Allow both local and deployed frontend
 const allowedOrigins = [
   "http://localhost:5173",
   "https://chat-app2-1-ffffffrnt.onrender.com",
@@ -31,11 +32,12 @@ app.use(
   })
 );
 
-// API routes
+// ✅ Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/admin", adminRoutes); // ✅ ADD THIS
 
-// ✅ Serve frontend build files in production
+// ✅ Serve frontend
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
@@ -44,7 +46,6 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-// Start server
 server.listen(PORT, () => {
   console.log("server is running on PORT:" + PORT);
   connectDB();
