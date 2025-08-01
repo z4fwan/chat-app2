@@ -40,13 +40,16 @@ const ProfilePage = () => {
     }
   };
 
+  if (!authUser) return <p className="text-center mt-10">Loading profile...</p>;
+
   return (
-    <div className="h-screen pt-20">
+    <div className="h-screen pt-20 text-white bg-black">
       <div className="max-w-2xl mx-auto p-4 py-8">
-        <h2 className="text-2xl font-semibold mb-6">Edit Profile</h2>
+        <h2 className="text-2xl font-semibold mb-6 text-center">Edit Profile</h2>
 
         <div className="flex flex-col items-center">
-          <div className="relative">
+          {/* Profile Picture */}
+          <div className="relative mb-4">
             <img
               src={selectedImg || "/default-profile.png"}
               alt="Profile"
@@ -62,6 +65,14 @@ const ProfilePage = () => {
               onChange={handleImageUpload}
               className="hidden"
             />
+          </div>
+
+          {/* Display Info */}
+          <div className="mt-4 text-center space-y-2">
+            <p className="text-lg font-bold">@{authUser.username}</p>
+            <p className="text-gray-400">{authUser.email}</p>
+            {authUser.fullName && <p className="text-gray-300">{authUser.fullName}</p>}
+            {authUser.bio && <p className="text-gray-400 italic">"{authUser.bio}"</p>}
           </div>
         </div>
       </div>
