@@ -7,6 +7,7 @@ import SignUpPage from "./pages/SignUpPage";
 import LoginPage from "./pages/LoginPage";
 import SettingsPage from "./pages/SettingsPage";
 import ProfilePage from "./pages/ProfilePage";
+import AdminDashboard from "./pages/AdminDashboard"; // ✅ Admin page
 
 import { useAuthStore } from "./store/useAuthStore";
 import { useThemeStore } from "./store/useThemeStore";
@@ -21,11 +22,12 @@ const App = () => {
   console.log({ authUser });
   console.log({ onlineUsers });
 
-  // ✅ Correct way to call checkAuth only once on mount
+  // ✅ Check auth only once on app mount
   useEffect(() => {
     useAuthStore.getState().checkAuth();
   }, []);
 
+  // ✅ While checking auth, show loader
   if (isCheckingAuth && !authUser) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -59,6 +61,12 @@ const App = () => {
           path="/profile"
           element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
         />
+        <Route
+          path="/admin"
+          element={
+            authUser?.isAdmin ? <AdminDashboard /> : <Navigate to="/" replace />
+          }
+        />
       </Routes>
 
       <Toaster />
@@ -67,6 +75,3 @@ const App = () => {
 };
 
 export default App;
-
-
-
