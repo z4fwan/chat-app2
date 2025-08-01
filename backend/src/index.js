@@ -8,7 +8,7 @@ import { connectDB } from "./lib/db.js";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
-import adminRoutes from "./routes/admin.routes.js"; // ✅ ADD THIS
+import adminRoutes from "./routes/admin.routes.js"; // ✅ Admin routes
 
 import { app, server } from "./lib/socket.js";
 
@@ -32,12 +32,17 @@ app.use(
   })
 );
 
-// ✅ Routes
+// ✅ Test route to verify server is working
+app.get("/api/test", (req, res) => {
+  res.send("Simple test route working ✅");
+});
+
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
-app.use("/api/admin", adminRoutes); // ✅ ADD THIS
+app.use("/api/admin", adminRoutes); // ✅ Admin route
 
-// ✅ Serve frontend
+// ✅ Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
@@ -50,3 +55,4 @@ server.listen(PORT, () => {
   console.log("server is running on PORT:" + PORT);
   connectDB();
 });
+
