@@ -3,8 +3,11 @@ import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
+// ✅ Use correct backend URL for socket connection
 const BASE_URL =
-  import.meta.env.MODE === "development" ? "http://localhost:5001" : "/";
+  import.meta.env.MODE === "development"
+    ? "http://localhost:5001"
+    : "https://chat-app2-foiy.onrender.com"; // <-- your backend Render URL
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -35,10 +38,10 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: res.data });
       toast.success("Account created successfully");
       get().connectSocket();
-      return true; // ✅ Tell caller it succeeded
+      return true;
     } catch (error) {
       toast.error(error.response?.data?.message || "Signup failed");
-      return false; // ❌ Tell caller it failed
+      return false;
     } finally {
       set({ isSigningUp: false });
     }
@@ -51,10 +54,10 @@ export const useAuthStore = create((set, get) => ({
       set({ authUser: res.data });
       toast.success("Logged in successfully");
       get().connectSocket();
-      return true; // ✅ Tell caller it succeeded
+      return true;
     } catch (error) {
       toast.error(error.response?.data?.message || "Login failed");
-      return false; // ❌ Tell caller it failed
+      return false;
     } finally {
       set({ isLoggingIn: false });
     }
@@ -90,12 +93,13 @@ export const useAuthStore = create((set, get) => ({
     if (!authUser || get().socket?.connected) return;
 
     const socket = io(BASE_URL, {
+      withCredentials: true,
       query: {
         userId: authUser._id,
       },
     });
-    socket.connect();
 
+    socket.connect();
     set({ socket });
 
     socket.on("getOnlineUsers", (userIds) => {
