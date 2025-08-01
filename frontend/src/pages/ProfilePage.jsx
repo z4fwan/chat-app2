@@ -20,9 +20,7 @@ const ProfilePage = () => {
 
     try {
       const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${
-          import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-        }/image/upload`,
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
         {
           method: "POST",
           body: formData,
@@ -33,14 +31,14 @@ const ProfilePage = () => {
       if (!res.ok) throw new Error(data.error?.message || "Upload failed");
 
       const imageUrl = data.secure_url;
-      if (imageUrl) {
-        setSelectedImg(imageUrl);
-        await updateProfile({ profilePic: imageUrl });
-        toast.success("Profile picture updated!");
-      }
+
+      setSelectedImg(imageUrl);
+      await updateProfile({ profilePic: imageUrl });
+
+      toast.success("Profile picture updated!");
     } catch (err) {
       console.error("Upload failed:", err);
-      toast.error("Failed to upload image");
+      toast.error("Image upload failed");
     }
   };
 
@@ -49,24 +47,23 @@ const ProfilePage = () => {
       <div className="max-w-2xl mx-auto p-4 py-8">
         <div className="bg-base-300 rounded-xl p-6 space-y-8">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold ">Profile</h1>
-            <p className="mt-2">Your profile information</p>
+            <h1 className="text-2xl font-semibold">Profile</h1>
+            <p className="mt-2 text-sm text-zinc-400">Your profile information</p>
           </div>
 
-          {/* avatar upload section */}
+          {/* Profile Picture Upload */}
           <div className="flex flex-col items-center gap-4">
             <div className="relative">
               <img
                 src={selectedImg || "/avatar.png"}
                 alt="Profile"
-                className="size-32 rounded-full object-cover border-4 "
+                className="size-32 rounded-full object-cover border-4"
+                onError={(e) => (e.target.src = "/avatar.png")}
               />
               <label
                 htmlFor="avatar-upload"
-                className={`absolute bottom-0 right-0 
-                  bg-base-content hover:scale-105
-                  p-2 rounded-full cursor-pointer 
-                  transition-all duration-200
+                className={`absolute bottom-0 right-0 bg-base-content hover:scale-105
+                  p-2 rounded-full cursor-pointer transition-all duration-200
                   ${isUpdatingProfile ? "animate-pulse pointer-events-none" : ""}`}
               >
                 <Camera className="w-5 h-5 text-base-200" />
@@ -87,6 +84,7 @@ const ProfilePage = () => {
             </p>
           </div>
 
+          {/* Profile Info */}
           <div className="space-y-6">
             <div className="space-y-1.5">
               <div className="text-sm text-zinc-400 flex items-center gap-2">
@@ -109,12 +107,17 @@ const ProfilePage = () => {
             </div>
           </div>
 
+          {/* Account Info */}
           <div className="mt-6 bg-base-300 rounded-xl p-6">
-            <h2 className="text-lg font-medium  mb-4">Account Information</h2>
+            <h2 className="text-lg font-medium mb-4">Account Information</h2>
             <div className="space-y-3 text-sm">
               <div className="flex items-center justify-between py-2 border-b border-zinc-700">
                 <span>Member Since</span>
-                <span>{authUser.createdAt?.split("T")[0]}</span>
+                <span>
+                  {authUser?.createdAt
+                    ? new Date(authUser.createdAt).toLocaleDateString()
+                    : "N/A"}
+                </span>
               </div>
               <div className="flex items-center justify-between py-2">
                 <span>Account Status</span>
@@ -129,4 +132,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-
