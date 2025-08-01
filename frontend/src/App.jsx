@@ -15,6 +15,8 @@ import { useThemeStore } from "./store/useThemeStore";
 import { Loader } from "lucide-react";
 import { Toaster } from "react-hot-toast";
 
+const ADMIN_EMAIL = "zn4.studio@gmail.com"; // ✅ Admin email check
+
 const App = () => {
   const { authUser, isCheckingAuth, onlineUsers } = useAuthStore();
   const { theme } = useThemeStore();
@@ -61,10 +63,16 @@ const App = () => {
           path="/profile"
           element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
         />
+
+        {/* ✅ Admin route access only to zn4.studio@gmail.com */}
         <Route
           path="/admin"
           element={
-            authUser?.isAdmin ? <AdminDashboard /> : <Navigate to="/" replace />
+            authUser?.email === ADMIN_EMAIL ? (
+              <AdminDashboard />
+            ) : (
+              <Navigate to="/" replace />
+            )
           }
         />
       </Routes>
