@@ -6,40 +6,42 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import { connectDB } from "./lib/db.js";
-import { app as socketApp, server } from "./lib/socket.js";
+import { app, server } from "./lib/socket.js";
 
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
 import adminRoutes from "./routes/admin.routes.js";
 
-import User from "./models/user.model.js"; // ✅ For /make-me-admin
+import User from "./models/user.model.js";
 
-dotenv.config();
-
-const PORT = process.env.PORT || 5001;
-
-// Fix __dirname in ES modules
+// Setup __dirname for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Allowed frontend origins
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://chat-app2-1-ffffffrnt.onrender.com",
-];
+// Load environment variables
+dotenv.config();
 
-// ✅ Middlewares
-socketApp.use(express.json());
-socketApp.use(cookieParser());
-socketApp.use(
+// Connect to MongoDB
+connectDB();
+
+// Middleware
+app.use(express.json());
+app.use(cookieParser());
+
+app.use(
   cors({
-    origin: allowedOrigins,
+    origin: ["http://localhost:5173", "https://chat-app2-1-ffffffrnt.onrender.com"],
     credentials: true,
   })
 );
 
-// ✅ Promote a user to admin (temporary route)
-socketApp.get("/make-me-admin", async (req, res) => {
+// 🔍 TEST ROUTE
+app.get("/api/test", (req, res) => {
+  res.send("✅ Test route working!");
+});
+
+// 📍 TEMP: Make a user admin
+app.get("/make-me-admin", async (req, res) => {
   try {
     const user = await User.findOneAndUpdate(
       { email: "zn4.studio@gmail.com" },
@@ -58,27 +60,23 @@ socketApp.get("/make-me-admin", async (req, res) => {
   }
 });
 
-// ✅ Simple test route
-socketApp.get("/api/test", (req, res) => {
-  res.send("Simple test route working ✅");
-});
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/messages", messageRoutes);
+app.use("/api/admin", adminRoutes);
 
-// ✅ API routes
-socketApp.use("/api/auth", authRoutes);
-socketApp.use("/api/messages", messageRoutes);
-socketApp.use("/api/admin", adminRoutes);
-
-// ✅ Serve frontend in production
+// Production static serving
 if (process.env.NODE_ENV === "production") {
-  socketApp.use(express.static(path.join(__dirname, "../frontend/dist")));
+  app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
-  socketApp.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
   });
 }
 
-// ✅ Start server and connect DB
+// Start server
+const PORT = process.env.PORT || 5001;
 server.listen(PORT, () => {
-  console.log("✅ Server is running on PORT:", PORT);
-  connectDB();
+  console.log(`🚀 Server running on port ${PORT}`);
 });
+
