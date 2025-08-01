@@ -10,6 +10,10 @@ import { requireAdmin } from "../middlewares/adminMiddleware.js";
 
 const router = express.Router();
 
+// ✅ Move test route before protectRoute middleware
+router.get("/test", (req, res) => res.send("Admin route working ✅"));
+
+// ✅ All routes below require admin access
 router.use(protectRoute, requireAdmin);
 
 router.get("/users", getAllUsers);
@@ -17,8 +21,4 @@ router.put("/block/:id", toggleBlockUser);
 router.put("/verify/:id", verifyUser);
 router.delete("/delete/:id", deleteUser);
 
-// Optional test route
-router.get("/test", (req, res) => res.send("Admin route working ✅"));
-
 export default router;
-
