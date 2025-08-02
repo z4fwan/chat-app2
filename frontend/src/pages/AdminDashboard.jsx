@@ -7,9 +7,13 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axiosInstance.get("/admin/users"); // ✅ fixed
+      const res = await axiosInstance.get("/admin/users", {
+        withCredentials: true, // ✅ important if using cookies for auth
+      });
+      console.log("Fetched users:", res.data); // ✅ log the response
       setUsers(res.data);
     } catch (err) {
+      console.error("Fetch error:", err); // ✅ log the error
       toast.error("Failed to load users");
     }
   };
@@ -17,7 +21,7 @@ const AdminDashboard = () => {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure to delete this user?")) return;
     try {
-      await axiosInstance.delete(`/admin/users/${id}`); // ✅ fixed
+      await axiosInstance.delete(`/admin/users/${id}`);
       toast.success("User deleted");
       fetchUsers();
     } catch {
@@ -27,7 +31,7 @@ const AdminDashboard = () => {
 
   const toggleBlock = async (id) => {
     try {
-      await axiosInstance.put(`/admin/users/${id}/block`); // ✅ fixed
+      await axiosInstance.put(`/admin/users/${id}/block`);
       fetchUsers();
     } catch {
       toast.error("Error blocking user");
@@ -36,7 +40,7 @@ const AdminDashboard = () => {
 
   const toggleVerify = async (id) => {
     try {
-      await axiosInstance.put(`/admin/users/${id}/verify`); // ✅ fixed
+      await axiosInstance.put(`/admin/users/${id}/verify`);
       fetchUsers();
     } catch {
       toast.error("Error verifying user");
@@ -110,3 +114,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
