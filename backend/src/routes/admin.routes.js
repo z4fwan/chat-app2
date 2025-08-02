@@ -5,15 +5,15 @@ import {
   deleteUser,
   verifyUser,
 } from "../controllers/admin.controller.js";
-import { protectRoute } from "../middlewares/protectRoute.js";
-import { requireAdmin } from "../middlewares/adminMiddleware.js";
+import { protectRoute } from "../middleware/auth.middleware.js"; // ✅ corrected path
+import { requireAdmin } from "../middleware/adminMiddleware.js"; // ✅ corrected path
 
 const router = express.Router();
 
-// ✅ Move test route before protectRoute middleware
+// ✅ Public route for testing
 router.get("/test", (req, res) => res.send("Admin route working ✅"));
 
-// ✅ All routes below require admin access
+// ✅ Protect all routes below
 router.use(protectRoute, requireAdmin);
 
 router.get("/users", getAllUsers);
