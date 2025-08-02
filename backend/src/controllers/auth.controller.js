@@ -5,29 +5,45 @@ import cloudinary from "../lib/cloudinary.js";
 
 // ✅ Signup
 export const signup = async (req, res) => {
-  const { fullName, email, password } = req.body;
+  const { fullName, email, password, username, bio, profilePic } = req.body;
 
   try {
-    if (!fullName || !email || !password) {
+    if (!fullName || !email || !password || !username) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
+      return res
+        .status(400)
+        .json({ message: "Password must be at least 6 characters" });
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
+
     if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
+      return res
+        .status(400)
+        .json({ message: "Email or username already exists" });
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
+    let uploadedProfilePic = "";
+    if (profilePic) {
+      const uploadResponse = await cloudinary.uploader.upload(profilePic);
+      uploadedProfilePic = uploadResponse.secure_url;
+    }
+
     const newUser = new User({
       fullName,
       email,
       password: hashedPassword,
+      username,
+      bio: bio || "",
+      profilePic: uploadedProfilePic,
     });
 
     await newUser.save();
