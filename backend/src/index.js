@@ -8,6 +8,7 @@ import { fileURLToPath } from "url";
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
+import adminRoutes from "./routes/admin.route.js"; // ✅ Import admin routes
 import { app, server } from "./lib/socket.js";
 
 dotenv.config();
@@ -25,7 +26,7 @@ app.use(cookieParser());
 // ✅ CORS Config for Render
 app.use(
   cors({
-    origin: process.env.CLIENT_URL, // e.g. https://chat-app2-1-ffffffrnt.onrender.com
+    origin: process.env.CLIENT_URL, // e.g. https://chat-app2-client.onrender.com
     credentials: true,
   })
 );
@@ -35,6 +36,7 @@ console.log("✅ CORS allowed origin:", process.env.CLIENT_URL);
 // ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/admin", adminRoutes); // ✅ Mount admin route
 
 // ✅ Serve frontend in production
 if (process.env.NODE_ENV === "production") {
@@ -50,3 +52,4 @@ server.listen(PORT, () => {
   console.log(`✅ Server running on PORT: ${PORT}`);
   connectDB();
 });
+
