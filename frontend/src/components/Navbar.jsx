@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/useAuthStore";
 import { LogOut, MessageSquare, Settings, User, Shield } from "lucide-react";
 
@@ -6,6 +6,11 @@ const ADMIN_EMAIL = "zn4.studio@gmail.com"; // ✅ Admin email
 
 const Navbar = () => {
   const { logout, authUser } = useAuthStore();
+  const location = useLocation();
+
+  // ✅ Hide Settings on login or signup pages
+  const isAuthPage =
+    location.pathname === "/login" || location.pathname === "/signup";
 
   return (
     <header
@@ -24,17 +29,20 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Link
-              to={"/settings"}
-              className="btn btn-sm gap-2 transition-colors"
-            >
-              <Settings className="w-4 h-4" />
-              <span className="hidden sm:inline">Settings</span>
-            </Link>
+            {/* ✅ Show Settings only when not on /login or /signup */}
+            {authUser && !isAuthPage && (
+              <Link
+                to="/settings"
+                className="btn btn-sm gap-2 transition-colors"
+              >
+                <Settings className="w-4 h-4" />
+                <span className="hidden sm:inline">Settings</span>
+              </Link>
+            )}
 
             {authUser && (
               <>
-                <Link to={"/profile"} className="btn btn-sm gap-2">
+                <Link to="/profile" className="btn btn-sm gap-2">
                   <User className="size-5" />
                   <span className="hidden sm:inline">Profile</span>
                 </Link>
