@@ -3,8 +3,10 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
 
+// ✅ Signup
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
+
   try {
     if (!fullName || !email || !password) {
       return res.status(400).json({ message: "All fields are required" });
@@ -28,15 +30,18 @@ export const signup = async (req, res) => {
       password: hashedPassword,
     });
 
-    await newUser.save(); // ✅ Save first
+    await newUser.save();
 
-    generateToken(newUser._id, res); // ✅ Then set cookie
+    generateToken(newUser._id, res);
 
     res.status(201).json({
       _id: newUser._id,
       fullName: newUser.fullName,
+      username: newUser.username,
       email: newUser.email,
       profilePic: newUser.profilePic,
+      bio: newUser.bio,
+      isVerified: newUser.isVerified,
     });
   } catch (error) {
     console.log("Error in signup controller", error.message);
@@ -44,10 +49,18 @@ export const signup = async (req, res) => {
   }
 };
 
+// ✅ Login (email or username)
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  const { emailOrUsername, password } = req.body;
+
   try {
-    const user = await User.findOne({ email });
+    if (!emailOrUsername || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const user = await User.findOne({
+      $or: [{ email: emailOrUsername }, { username: emailOrUsername }],
+    });
 
     if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -63,8 +76,11 @@ export const login = async (req, res) => {
     res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
+      username: user.username,
       email: user.email,
       profilePic: user.profilePic,
+      bio: user.bio,
+      isVerified: user.isVerified,
     });
   } catch (error) {
     console.log("Error in login controller", error.message);
@@ -72,6 +88,7 @@ export const login = async (req, res) => {
   }
 };
 
+// ✅ Logout
 export const logout = (req, res) => {
   try {
     res.cookie("jwt", "", { maxAge: 0 });
@@ -82,6 +99,7 @@ export const logout = (req, res) => {
   }
 };
 
+// ✅ Update profile picture
 export const updateProfile = async (req, res) => {
   try {
     const { profilePic } = req.body;
@@ -105,6 +123,7 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+// ✅ Check auth
 export const checkAuth = (req, res) => {
   try {
     res.status(200).json(req.user);
