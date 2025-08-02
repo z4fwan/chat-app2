@@ -7,7 +7,7 @@ const AdminDashboard = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axiosInstance.get("/admin/users", {
+      const res = await axiosInstance.get("/api/admin/users", {
         withCredentials: true, // ✅ important if using cookies for auth
       });
       console.log("Fetched users:", res.data); // ✅ log the response
