@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
+import { fileURLToPath } from "url";
 
 import { connectDB } from "./lib/db.js";
 import authRoutes from "./routes/auth.route.js";
@@ -11,38 +12,41 @@ import { app, server } from "./lib/socket.js";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
-const __dirname = path.resolve();
+// Setup __dirname in ES Module
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// ✅ Parse incoming JSON and cookies
+const PORT = process.env.PORT || 5000;
+
+// ✅ Middlewares
 app.use(express.json());
 app.use(cookieParser());
 
-// ✅ CORS config to allow frontend origin and cookies
+// ✅ CORS Config for Render
 app.use(
   cors({
-    origin: process.env.CLIENT_URL, // Example: https://chat-app2-front.onrender.com
+    origin: process.env.CLIENT_URL, // e.g. https://chat-app2-1-ffffffrnt.onrender.com
     credentials: true,
   })
 );
 
-// ✅ Routes
+console.log("✅ CORS allowed origin:", process.env.CLIENT_URL);
+
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// ✅ Serve frontend static files in production
+// ✅ Serve frontend in production
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
   });
 }
 
-// ✅ Start the server
+// ✅ Start server and connect DB
 server.listen(PORT, () => {
-  console.log(`Server running on PORT: ${PORT}`);
+  console.log(`✅ Server running on PORT: ${PORT}`);
   connectDB();
 });
-
-
