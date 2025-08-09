@@ -7,9 +7,10 @@ import bcrypt from "bcryptjs";
 import { fileURLToPath } from "url";
 
 import { connectDB } from "./lib/db.js";
-import { app, server } from "./lib/socket.js"; // Make sure socket.js exports app and server
+import { app, server } from "./lib/socket.js"; // socket.js should export app & server
 import authRoutes from "./routes/auth.route.js";
 import messageRoutes from "./routes/message.route.js";
+import userRoutes from "./routes/user.route.js";
 import adminRoutes from "./routes/admin.route.js";
 import User from "./models/user.model.js";
 
@@ -22,25 +23,33 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ✅ Middlewares
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173", // ⚠️ Update to your frontend URL in production
+    origin: [
+      "http://localhost:5173", // Dev
+      "https://z-app-official-frontend.onrender.com" // Prod
+    ],
     credentials: true,
   })
 );
 
-// ✅ Routes
+// ✅ API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/admin", adminRoutes);
 
-// ✅ Serve frontend (production build)
+// ✅ Serve frontend in production
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+  // On Render, frontend is built into backend/dist
+  const frontendPath = path.join(__dirname, "./dist");
+  app.use(express.static(frontendPath));
+
   app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
+    res.sendFile(path.join(frontendPath, "index.html"));
   });
 }
 
@@ -56,16 +65,14 @@ const createDefaultAdmin = async () => {
     const existingAdmin = await User.findOne({ email: adminEmail });
 
     if (!existingAdmin) {
-      const hashedPassword = await bcrypt.hash("safwan123", 10); // You can change this default password
-      const admin = new User({
-        fullName: "Admin",
+      const hashedPassword = await bcrypt.hash("safwan123", 10); // Change password if needed
+      await User.create({
+        username: "admin",
         email: adminEmail,
         password: hashedPassword,
         isAdmin: true,
         isVerified: true,
       });
-
-      await admin.save();
       console.log(`✅ Default admin created: ${adminEmail}`);
     } else {
       console.log("ℹ️ Admin already exists.");
