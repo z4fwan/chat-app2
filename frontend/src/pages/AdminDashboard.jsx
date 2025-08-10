@@ -12,7 +12,11 @@ const AdminDashboard = () => {
   const fetchUsers = async () => {
     try {
       const res = await axios.get("/api/admin/users", { withCredentials: true });
-      const userList = Array.isArray(res.data.users) ? res.data.users : Array.isArray(res.data) ? res.data : [];
+      const userList = Array.isArray(res.data.users)
+        ? res.data.users
+        : Array.isArray(res.data)
+        ? res.data
+        : [];
       setUsers(userList);
     } catch (err) {
       console.error("Error fetching users", err);
@@ -122,12 +126,12 @@ const AdminDashboard = () => {
                     <td>{user.isSuspended ? "⏸️ Suspended" : "—"}</td>
                     <td>{user.isBlocked ? "🚫 Blocked" : "—"}</td>
                     <td>
-                      <div className="flex flex-wrap justify-center gap-2 max-w-[300px]">
+                      <div className="flex flex-wrap justify-center gap-2 max-w-[320px]">
                         <button
                           onClick={() =>
                             handleAction(user._id, user.isSuspended ? "unsuspend" : "suspend")
                           }
-                          className="btn btn-xs sm:btn-sm btn-warning"
+                          className="btn btn-xs sm:btn-sm btn-warning min-w-[90px] h-8 sm:h-9"
                         >
                           {user.isSuspended ? "Unsuspend" : "Suspend"}
                         </button>
@@ -135,7 +139,7 @@ const AdminDashboard = () => {
                           onClick={() =>
                             handleAction(user._id, user.isBlocked ? "unblock" : "block")
                           }
-                          className={`btn btn-xs sm:btn-sm ${
+                          className={`btn btn-xs sm:btn-sm min-w-[90px] h-8 sm:h-9 ${
                             user.isBlocked ? "btn-outline btn-neutral" : "btn-error"
                           }`}
                         >
@@ -145,7 +149,7 @@ const AdminDashboard = () => {
                           onClick={() =>
                             handleAction(user._id, user.isVerified ? "unverify" : "verify")
                           }
-                          className={`btn btn-xs sm:btn-sm ${
+                          className={`btn btn-xs sm:btn-sm min-w-[90px] h-8 sm:h-9 ${
                             user.isVerified ? "btn-outline btn-info" : "btn-success"
                           }`}
                         >
@@ -153,7 +157,7 @@ const AdminDashboard = () => {
                         </button>
                         <button
                           onClick={() => handleDelete(user._id)}
-                          className="btn btn-xs sm:btn-sm btn-outline btn-error"
+                          className="btn btn-xs sm:btn-sm btn-outline btn-error min-w-[90px] h-8 sm:h-9"
                         >
                           Delete
                         </button>
@@ -196,8 +200,15 @@ const AdminDashboard = () => {
               </select>
             </label>
             <div className="flex justify-end gap-2">
-              <button className="btn btn-outline" onClick={() => setSuspendModal({ show: false, userId: null })}>Cancel</button>
-              <button className="btn btn-warning" onClick={confirmSuspend}>Suspend</button>
+              <button
+                className="btn btn-outline"
+                onClick={() => setSuspendModal({ show: false, userId: null })}
+              >
+                Cancel
+              </button>
+              <button className="btn btn-warning" onClick={confirmSuspend}>
+                Suspend
+              </button>
             </div>
           </div>
         </div>
@@ -207,3 +218,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+
